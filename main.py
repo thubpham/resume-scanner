@@ -1,4 +1,5 @@
 import logging
+from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -12,10 +13,24 @@ from api.job_api import job_router
 setup_logging()
 logger = logging.getLogger(__name__)
 
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Handle start-up and shut-down events."""
+    # Startup code
+    logger.info("🚀 Starting up...")
+    await init_models(Base)
+    logger.info("✅ Database initialized!")
+
+    yield
+
+    # Shutdown code
+    logger.info("🛑 Shutting down...")
+
 app = FastAPI(
     title=settings.PROJECT_NAME,
     description="API for uploading and processing resumes",
-    version="1.0.0"
+    version="1.0.0", 
+    lifespan=lifespan
 )
 
 # CORS middleware
@@ -31,12 +46,12 @@ app.add_middleware(
 app.include_router(resume_router, prefix="/api/v1/resume", tags=["Resume"])
 app.include_router(job_router, prefix="/api/v1/job", tags=["Job"])
 
-@app.on_event("startup")
-async def startup_event():
-    """Initialize database on startup"""
-    logger.info("🚀 Starting up...")
-    await init_models(Base)
-    logger.info("✅ Database initialized!")
+# @app.on_event("startup")
+# async def startup_event():
+#     """Initialize database on startup"""
+#     logger.info("🚀 Starting up...")
+#     await init_models(Base)
+#     logger.info("✅ Database initialized!")
 
 @app.get("/")
 async def root():
