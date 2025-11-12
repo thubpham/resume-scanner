@@ -108,3 +108,9 @@ class JobKeywordExtractionError(Exception):
             message = "Job keyword extraction failed. Cannot improve resume without job requirements."
         super().__init__(message)
         self.job_id = job_id
+
+class ProviderError(RuntimeError):
+    """Raised when the underlying LLM provider fails"""
+
+class StrategyError(RuntimeError):
+    """Raised when a Strategy cannot parse/return expected output"""

@@ -11,7 +11,7 @@ from pydantic import ValidationError
 from typing import Dict, Optional
 
 from database.resume_db import Resume, ProcessedResume
-from agent_manager import AgentManager
+from agent.agent_manager import AgentManager
 from prompt.prompt_manager import PromptFactory
 from schema.json.json_manager import JSONSchemaFactory
 from schema.pydantic.structured_resume_pydantic import StructuredResumeModel

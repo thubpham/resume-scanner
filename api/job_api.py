@@ -6,9 +6,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi import APIRouter, HTTPException, Depends, Request, status, Query
 from fastapi.responses import JSONResponse
 
-from app.core import get_db_session
-from app.services import JobService, JobNotFoundError
-from app.schemas.pydantic.job import JobUploadRequest
+from core.database import get_db_session
+from service.job_service import JobService
+from exception import JobNotFoundError
+from schema.pydantic.job_request_pydantic import JobUploadRequest
 
 job_router = APIRouter()
 logger = logging.getLogger(__name__)

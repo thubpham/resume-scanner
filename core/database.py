@@ -12,27 +12,28 @@ from sqlalchemy.ext.asyncio import (
     async_sessionmaker,
     create_async_engine,
 )
-
-# from .config import settings
-# from ..models.base import Base
-
 from core.config import settings 
 from database.base import Base
 
+# class _DatabaseSettings:
+#     """Pulled from environment once at import-time."""
 
-class _DatabaseSettings:
-    """Pulled from environment once at import-time."""
+#     SYNC_DATABASE_URL: str = settings.SYNC_DATABASE_URL
+#     ASYNC_DATABASE_URL: str = settings.ASYNC_DATABASE_URL
+#     DB_ECHO: bool = settings.DB_ECHO
 
-    SYNC_DATABASE_URL: str = settings.SYNC_DATABASE_URL
-    ASYNC_DATABASE_URL: str = settings.ASYNC_DATABASE_URL
-    DB_ECHO: bool = settings.DB_ECHO
-
-    DB_CONNECT_ARGS = (
-        {"check_same_thread": False} if SYNC_DATABASE_URL.startswith("sqlite") else {}
-    )
+#     DB_CONNECT_ARGS = (
+#         {"check_same_thread": False} if SYNC_DATABASE_URL.startswith("sqlite") else {}
+#     )
 
 
-settings = _DatabaseSettings()
+# settings = _DatabaseSettings()
+
+def _get_connect_args(database_url: str) -> dict:
+    """Get connection arguents based on database URL."""
+    if database_url and database_url.startswith("sqlite"):
+        return {"check_same_thread": False}
+    return {}
 
 
 def _configure_sqlite(engine: Engine) -> None:
@@ -56,12 +57,17 @@ def _configure_sqlite(engine: Engine) -> None:
 
 @lru_cache(maxsize=1)
 def _make_sync_engine() -> Engine:
+
+    """Check if SYNC_DATABASE_URL is set."""
+    if not settings.SYNC_DATABASE_URL:
+        raise ValueError("SYNC_DATABASE_URL is not set in the configuration.")
+    
     """Create (or return) the global synchronous Engine."""
     engine = create_engine(
         settings.SYNC_DATABASE_URL,
         echo=settings.DB_ECHO,
         pool_pre_ping=True,
-        connect_args=settings.DB_CONNECT_ARGS,
+        connect_args=_get_connect_args(settings.SYNC_DATABASE_URL),
         future=True,
     )
     _configure_sqlite(engine)
@@ -70,17 +76,21 @@ def _make_sync_engine() -> Engine:
 
 @lru_cache(maxsize=1)
 def _make_async_engine() -> AsyncEngine:
+
+    """Check if ASYNC_DATABASE_URL is set."""
+    if not settings.ASYNC_DATABASE_URL:
+        raise ValueError("ASYNC_DATABASE_URL is not set in the configuration.")
+    
     """Create (or return) the global asynchronous Engine."""
     engine = create_async_engine(
         settings.ASYNC_DATABASE_URL,
         echo=settings.DB_ECHO,
         pool_pre_ping=True,
-        connect_args=settings.DB_CONNECT_ARGS,
+        connect_args=_get_connect_args(settings.ASYNC_DATABASE_URL),
         future=True,
     )
     _configure_sqlite(engine.sync_engine)
     return engine
-
 
 # ──────────────────────────────────────────────────────────────────────────────
 # Session factories

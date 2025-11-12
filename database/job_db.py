@@ -1,9 +1,8 @@
 from sqlalchemy.types import JSON
 from sqlalchemy.orm import relationship
 from sqlalchemy import Column, String, Text, Integer, ForeignKey, DateTime, text
-
-from .base import Base
-from .association import job_resume_association
+from database.base import Base
+from database.job_resume_association import job_resume_association
 
 
 class ProcessedJob(Base):

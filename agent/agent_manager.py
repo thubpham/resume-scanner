@@ -1,9 +1,8 @@
 import os
 from typing import Dict, Any
-
-from ..core import settings
-from .strategies.wrapper import JSONWrapper, MDWrapper
-from .providers.base import Provider, EmbeddingProvider
+from core.config import settings
+from agent.strategy.wrapper import JSONWrapper, MDWrapper
+from agent.providers.base import Provider, EmbeddingProvider
 
 class AgentManager:
     def __init__(self,
